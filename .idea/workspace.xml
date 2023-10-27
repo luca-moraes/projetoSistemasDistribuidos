@@ -10,9 +10,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="de347133-61da-4e13-b162-de924d3898a9" name="Changes" comment="configuracao modelo clion">
-      <change beforePath="$PROJECT_DIR$/runMPI.sh" beforeDir="false" afterPath="$PROJECT_DIR$/runMPI.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/solucaoMPI/lab5.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/solucaoMPI/lab5.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ubuntuEnv.sh" beforeDir="false" afterPath="$PROJECT_DIR$/ubuntuEnv.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/solucaoMPI/main.run" beforeDir="false" afterPath="$PROJECT_DIR$/solucaoMPI/main.run" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
