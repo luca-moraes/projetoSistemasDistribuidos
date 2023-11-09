@@ -85,50 +85,59 @@ int main(int argc, char** argv){
 
         startTime = MPI_Wtime();
 
-        for(int i = 0; i < sizeBiggerNumsArray; i++){
-            biggerNums[i] = randomNums[i];
-        }
+        // for(int i = 0; i < sizeBiggerNumsArray; i++){
+        //     biggerNums[i] = randomNums[i];
+        // }
 
-        for(int i = 1; i < clusterSize; i++){
-
-            MPI_Send(&randomNums[(i)*sizeBiggerNumsArray], sizeBiggerNumsArray, MPI_FLOAT, i, 0, MPI_COMM_WORLD);
-        }
+        // for(int i = 1; i < clusterSize; i++){
+        //     MPI_Send(&randomNums[(i)*sizeBiggerNumsArray], sizeBiggerNumsArray, MPI_FLOAT, i, 0, MPI_COMM_WORLD);
+        // }
     }
+
+    MPI_Scatter(&randomNums, sizeBiggerNumsArray, MPI_FLOAT, &biggerNums, sizeBiggerNumsArray, MPI_FLOAT, 0, MPI_COMM_WORLD);
+
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    if(processRank != 0){
+    // if(processRank != 0){
         
-        MPI_Recv(&biggerNums, sizeBiggerNumsArray, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // MPI_Recv(&biggerNums, sizeBiggerNumsArray, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         printSubArray(processRank, biggerNums, sizeBiggerNumsArray);
-    }
+    // }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     // todos os processos deben encontrar el major valor e enviar para lo processo 0
-    if(processRank != 0){
+    // if(processRank != 0){
         float maxNum = maxNumArray(biggerNums, sizeBiggerNumsArray);
         
-        MPI_Send(&maxNum, 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
-    }
+    //     MPI_Send(&maxNum, 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+    // }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    // MPI_Barrier(MPI_COMM_WORLD);
+
+    float finalMaxNum;
+
+    MPI_Reduce(&maxNum, &finalMaxNum, clusterSize, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
+
 
     if(processRank == 0){
-        float maxNums[clusterSize];
+        // float maxNums[clusterSize];
 
-        maxNums[0] = maxNumArray(biggerNums, sizeBiggerNumsArray);
+        // maxNums[0] = maxNumArray(biggerNums, sizeBiggerNumsArray);
 
-        for(int i = 1; i < clusterSize; i++){
-            MPI_Recv(&maxNums[i], 1, MPI_FLOAT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        }
+        // for(int i = 1; i < clusterSize; i++){
+        //     MPI_Recv(&maxNums[i], 1, MPI_FLOAT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        // }
 
-        cout << "Array de maiores valores: " << endl;
+        // cout << "Array de maiores valores: " << endl;
 
-        printArray(maxNums, clusterSize);
+        // printArray(maxNums, clusterSize);
 
-        cout << "Maior valor de TODOS OS MUNDOS DO UNIVERSO!!!: " << maxNumArray(maxNums, clusterSize) << endl;
+        // cout << "Maior valor de TODOS OS MUNDOS DO UNIVERSO!!!: " << maxNumArray(maxNums, clusterSize) << endl;
+
+        cout << "Maior valor de TODOS OS MUNDOS DO UNIVERSO!!!: " << finalMaxNum << endl;
 
         totalTime = MPI_Wtime() - startTime;
 
