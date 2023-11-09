@@ -26,7 +26,7 @@ void printArray(float* array, int size){
 void printSubArray(int pRank, float* array, int size){
     std::stringstream ss;
 
-    ss << "Valores recebidos pelo processo " << pRank <<  ": " << endl;
+    ss << "\nValores recebidos pelo processo " << pRank <<  ": " << endl;
 
     for(int i = 0; i < size; i++){
         ss << setprecision(5) << array[i] << " ";
@@ -73,10 +73,10 @@ int main(int argc, char** argv){
     int sizeBiggerNumsArray = 5;
     float biggerNums[sizeBiggerNumsArray];
 
-    if(processRank == 0){
-        int sizeRandomArray = (clusterSize) * sizeBiggerNumsArray;        
-        float randomNums[sizeRandomArray];
+    int sizeRandomArray = (clusterSize) * sizeBiggerNumsArray;        
+    float randomNums[sizeRandomArray];
 
+    if(processRank == 0){
         fillFloatArray(randomNums, sizeRandomArray);
 
         cout << "Array de números aleatórios: " << endl;
@@ -96,7 +96,6 @@ int main(int argc, char** argv){
 
     MPI_Scatter(&randomNums, sizeBiggerNumsArray, MPI_FLOAT, &biggerNums, sizeBiggerNumsArray, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
-
     MPI_Barrier(MPI_COMM_WORLD);
 
     // if(processRank != 0){
@@ -111,6 +110,10 @@ int main(int argc, char** argv){
     // todos os processos deben encontrar el major valor e enviar para lo processo 0
     // if(processRank != 0){
         float maxNum = maxNumArray(biggerNums, sizeBiggerNumsArray);
+
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        cout << "\nMaior valor do processo " << processRank << ": " << maxNum << endl;
         
     //     MPI_Send(&maxNum, 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
     // }
@@ -119,8 +122,9 @@ int main(int argc, char** argv){
 
     float finalMaxNum;
 
-    MPI_Reduce(&maxNum, &finalMaxNum, clusterSize, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&maxNum, &finalMaxNum, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
 
+    MPI_Barrier(MPI_COMM_WORLD);
 
     if(processRank == 0){
         // float maxNums[clusterSize];
