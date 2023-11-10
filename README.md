@@ -1,2 +1,2 @@
-# sistemasDistribuidosOpenMPI
+# projetoSistemasDistribuidos
 projeto de sistema financeiro distribuido
