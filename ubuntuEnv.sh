@@ -1,9 +1,10 @@
 #!bin/bash
 sudo apt-get update
-sudo apt-get install libopenmpi-dev
+# sudo apt-get install python-pip
+sudo apt install python3-pip
 
-# teste
-mpicc --version
-mpic++ --version
+# pip install requests
+pip3 install requests
+
 
 
