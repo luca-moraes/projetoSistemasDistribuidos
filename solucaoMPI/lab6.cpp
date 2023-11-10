@@ -141,7 +141,7 @@ int main(int argc, char** argv){
 
         // cout << "Maior valor de TODOS OS MUNDOS DO UNIVERSO!!!: " << maxNumArray(maxNums, clusterSize) << endl;
 
-        cout << "Maior valor de TODOS OS MUNDOS DO UNIVERSO!!!: " << finalMaxNum << endl;
+        cout << "\nMaior valor de TODOS OS MUNDOS DO UNIVERSO!!!: " << finalMaxNum << endl;
 
         totalTime = MPI_Wtime() - startTime;
 
