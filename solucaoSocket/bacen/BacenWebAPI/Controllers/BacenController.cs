@@ -18,18 +18,27 @@ public class BacenController : ControllerBase
     } 
 
     [HttpGet(Name = "ConsultarChave")]
-    public ClientData consultarChave([FromQuery(Name = "chave")] string chave)
+    public ClienteResponseOutput consultarChave([FromQuery(Name = "chave")] string chave)
     {
-        ClientData cliente = buscarCliente(chave);
-
-        if (cliente == null)
+        try
         {
+            ClientData? cliente = buscarCliente(chave);
+            
+            if (cliente != null)
+            {
+                return new ClienteResponseOutput()
+                {
+                    clienteData = cliente
+                };
+            }
+
             var str = $"Não foi encontrado cliente com a chave '{chave}'!";
             throw new BadHttpRequestException(str,404);
         }
-        else
+        catch (Exception e)
         {
-            return cliente;
+            var str = $"Não foi encontrado cliente com a chave '{chave}'!";
+            throw new BadHttpRequestException(str,404);
         }
     }
 }

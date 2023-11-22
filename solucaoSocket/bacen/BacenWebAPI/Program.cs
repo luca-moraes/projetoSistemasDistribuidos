@@ -1,9 +1,8 @@
 using System.Net;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.WebHost.UseUrls("https://0.0.0.0:7048;http://0.0.0.0:5288");
 
 builder.Services.AddCors(opt =>
 {
@@ -16,11 +15,23 @@ builder.Services.AddCors(opt =>
         });
 });
 
+builder.WebHost.UseUrls("https://0.0.0.0:7048;http://0.0.0.0:5288");
+
 // Add services to the container.
 builder.Services.AddControllers();
 
+builder.Services
+    .AddControllersWithViews()
+    .AddNewtonsoftJson(options => 
+        options
+            .SerializerSettings
+            .Converters
+            .Add(new StringEnumConverter())
+    );
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+
+
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -50,6 +61,8 @@ builder.Services.AddSwaggerGen(c =>
         } 
     }); 
 });
+
+builder.Services.AddSwaggerGenNewtonsoftSupport();
 
 var app = builder.Build();
 app.UseCors();
