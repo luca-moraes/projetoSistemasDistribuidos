@@ -69,3 +69,8 @@
 /home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Newtonsoft.Json.dll
 /home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Newtonsoft.Json.Bson.dll
 /home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Swashbuckle.AspNetCore.Newtonsoft.dll
+/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Microsoft.AspNetCore.JsonPatch.dll
+/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Newtonsoft.Json.dll
+/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Newtonsoft.Json.Bson.dll
+/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/bin/Debug/net7.0/Swashbuckle.AspNetCore.Newtonsoft.dll

@@ -39,29 +39,10 @@ public class BancoApplication {
 		SpringApplication.run(BancoApplication.class, args);
 	}
 
-	public static void fillHash(){
-		clientes.put(11, new Cliente(11, 1000.0f));
-	}
-
-	@GetMapping("/teste")
-	public String testeCreate(@RequestParam(value = "key", defaultValue = "a1") String chave, @RequestParam(value = "k2", defaultValue = "a2") String c2){
-		return String.format("Response: %s - %s", chave, c2);
-		// teste req: http://localhost:8080/teste?key=a55&k2=a44
-	}
-
-	@GetMapping("/testePath/{id}/{id2}")
-	public String testePath(@PathVariable Integer id, @PathVariable Integer id2){
-		// id = id == null ? 3 : id;
-		// id2 = id2 == null ? 4 : id2;
-
-		return String.format("Response: %d - %d", id, id2);
-		// teste req: http://localhost:8080/teste?key=a55&k2=a44
-	}
-
 	@GetMapping("/FazerTransferencia/{clienteId}/{value}/{key}")
 	public int fazerTransferencia(@PathVariable int clienteId, @PathVariable float value, @PathVariable String key) {
 		try {
-			System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n REQ: " + key + " \n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+			System.out.println("\nREQ: " + key);
 			// teste req: http://localhost:8080/FazerTransferencia/11/12/a1
 
 			// ClienteDestino clienteDestinoPix = new ClienteDestino();
@@ -73,7 +54,7 @@ public class BancoApplication {
 			Cliente clienteOrigem = clientes.get(clienteId);
 			clienteOrigem.descontarSaldo(value);
 
-			System.out.println("Valor enviado para o cliente " + clienteDestinoPix.numeroConta + " da instituição " + clienteDestinoPix.nomeInstituicao);
+			System.out.println("Valor " + value + " enviado para o cliente " + clienteDestinoPix.numeroConta + " da instituição " + clienteDestinoPix.nomeInstituicao);
 
 			return 200;
 		} catch (Exception e) {
@@ -100,12 +81,10 @@ public class BancoApplication {
 			if (response.isSuccessful()) {
 				String responseBody = response.body().string();
 
-				System.out.println("\n\n Parsed JSON: " + responseBody + " \n\n");
-
 				JsonParser parser = new JsonParser();
 				JsonObject jsonResponse = parser.parse(responseBody).getAsJsonObject();
 
-				System.out.println("\n\n Parsed JSON: " + jsonResponse.toString() + " \n\n");
+				System.out.println("Parsed JSON: " + jsonResponse.toString());
 
 				String instituicaoNome = jsonResponse.getAsJsonObject("clienteData").get("nomeInstituicao").getAsString();
 				int clienteDestinoId = jsonResponse.getAsJsonObject("clienteData").get("numeroConta").getAsInt();
@@ -148,6 +127,25 @@ public class BancoApplication {
 		public X509Certificate[] getAcceptedIssuers() {
 			return new X509Certificate[0];
 		}
+	}
+
+	public static void fillHash(){
+		clientes.put(11, new Cliente(11, 1000.0f));
+	}
+
+	@GetMapping("/teste")
+	public String testeCreate(@RequestParam(value = "key", defaultValue = "a1") String chave, @RequestParam(value = "k2", defaultValue = "a2") String c2){
+		return String.format("Response: %s - %s", chave, c2);
+		// teste req: http://localhost:8080/teste?key=a55&k2=a44
+	}
+
+	@GetMapping("/testePath/{id}/{id2}")
+	public String testePath(@PathVariable Integer id, @PathVariable Integer id2){
+		// id = id == null ? 3 : id;
+		// id2 = id2 == null ? 4 : id2;
+
+		return String.format("Response: %d - %d", id, id2);
+		// teste req: http://localhost:8080/teste?key=a55&k2=a44
 	}
 }
 
