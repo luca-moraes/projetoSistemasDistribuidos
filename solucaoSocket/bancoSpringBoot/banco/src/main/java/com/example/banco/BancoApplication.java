@@ -39,23 +39,82 @@ public class BancoApplication {
 		SpringApplication.run(BancoApplication.class, args);
 	}
 
-	@GetMapping("/FazerTransferencia/{clienteId}/{value}/{key}")
-	public int fazerTransferencia(@PathVariable int clienteId, @PathVariable float value, @PathVariable String key) {
+	@GetMapping("/receberValor")
+	public int receberValor(@RequestParam(value = "chaveOrigem") String chaveOrigem, @RequestParam(value = "valor") float valor, @RequestParam(value = "destinoId") int destinoId){
 		try {
-			System.out.println("\nREQ: " + key);
+			System.out.println("\nREQ rec: " + chaveOrigem);
+			// teste req: http://localhost:8080/receberValor?chaveOrigem=a22&valor=12&destinoId=11
+
+			Cliente clienteDestinoPix = clientes.get(destinoId);
+
+			clienteDestinoPix.adicionarSaldo(valor);
+
+			System.out.println("Valor " + valor + " recebido de " + chaveOrigem + " para " + destinoId + " saldo=" + clienteDestinoPix.saldo);
+
+			return 200;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 404;
+		}
+	}
+
+	@GetMapping("/transferenciaInterna")
+	public int transferenciaInterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") float valor, @RequestParam(value = "clienteDestino") int clienteDestino){
+		try {
+			System.out.println("\nREQ int: " + clienteDestino);
+			// teste req: http://localhost:8080/transferenciaInterna?clienteId=11&valor=12&clienteDestino=a1
+
+			Cliente clienteDestinoPix = clientes.get(clienteDestino);
+			Cliente clienteOrigem = clientes.get(clienteId);
+
+			if(valor > clienteOrigem.saldo){
+				System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
+				return 405;
+			}
+
+			clienteOrigem.descontarSaldo(valor);
+			clienteDestinoPix.adicionarSaldo(valor);
+
+			System.out.println("Valor " + valor + " enviado de " + clienteOrigem.clienteId + " saldo:" + clienteOrigem.saldo + " para " + clienteDestinoPix.clienteId + " saldo:" + clienteDestinoPix.saldo);
+			return 200;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 404;
+		}
+	}
+
+	@GetMapping("/transferenciaExterna")
+	public int transferenciaExterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") float valor, @RequestParam(value = "chaveDestino") String chaveDestino){
+		// @GetMapping("/FazerTransferencia/{clienteId}/{value}/{key}")
+		// public int fazerTransferencia(@PathVariable int clienteId, @PathVariable float value, @PathVariable String key) {
+		try {
+			System.out.println("\nREQ ext: " + chaveDestino);
 			// teste req: http://localhost:8080/FazerTransferencia/11/12/a1
+			// teste req: http://localhost:8080/transferenciaExterna?clienteId=11&valor=12&chaveDestino=a1
 
 			// ClienteDestino clienteDestinoPix = new ClienteDestino();
 			// clienteDestinoPix.nomeInstituicao = "Banco do Brasil";
 			//clienteDestinoPix.numeroConta = 22;
 
-			ClienteDestino clienteDestinoPix = obterClienteDestino(key);
-
+			ClienteDestino clienteDestinoPix = obterClienteDestino(chaveDestino);
 			Cliente clienteOrigem = clientes.get(clienteId);
-			clienteOrigem.descontarSaldo(value);
 
-			System.out.println("Valor " + value + " enviado para o cliente " + clienteDestinoPix.numeroConta + " da instituição " + clienteDestinoPix.nomeInstituicao);
+			if(valor > clienteOrigem.saldo){
+				System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
+				return 405;
+			}
 
+			clienteOrigem.descontarSaldo(valor);
+
+			if(chamarApiRecebimento("a"+clienteOrigem.clienteId, valor, clienteDestinoPix.numeroConta) == 200){
+				System.out.println("enviado!");
+			}else{
+				clienteOrigem.adicionarSaldo(valor);
+				return 404;
+			}
+
+			System.out.println("Valor " + valor + " enviado para o cliente " + clienteDestinoPix.numeroConta + " da instituição " + clienteDestinoPix.nomeInstituicao);
+			// System.out.println("Saldo atual:" + clientes.get(clienteId).saldo);
 			return 200;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -104,6 +163,33 @@ public class BancoApplication {
 		}
 	}
 
+	private static int chamarApiRecebimento(String chaveOrig, float valor, int chaveDest) {
+		String apiUrl = "http://localhost:8080/receberValor?chaveOrigem=" + chaveOrig + "&valor=" + valor + "&destinoId=" + chaveDest;
+
+		OkHttpClient client = new OkHttpClient.Builder()
+				.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
+				.hostnameVerifier((hostname, session) -> true)
+				.build();
+
+		Request request = new Request.Builder()
+				.url(apiUrl)
+				.build();
+
+		try {
+			Response response = client.newCall(request).execute();
+
+			if (response.isSuccessful()) {
+				return 200;
+			} else {
+				System.out.println("Falha na chamada à API externa: " + response.code());
+				return 404;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			return 404;
+		}
+	}
+
 	private static SSLSocketFactory createUnsafeSSLSocketFactory() {
 		try {
 			SSLContext sslContext = SSLContext.getInstance("SSL");
@@ -130,7 +216,9 @@ public class BancoApplication {
 	}
 
 	public static void fillHash(){
-		clientes.put(11, new Cliente(11, 1000.0f));
+		for(int i = 1; i <= 5000; i++){
+			clientes.put(i, new Cliente(i, 100.0f));
+		}
 	}
 
 	@GetMapping("/teste")
@@ -160,6 +248,10 @@ class Cliente{
 
 	public void descontarSaldo(float valor) {
 		this.saldo -= valor;
+	}
+
+	public void adicionarSaldo(float valor) {
+		this.saldo += valor;
 	}
 }
 

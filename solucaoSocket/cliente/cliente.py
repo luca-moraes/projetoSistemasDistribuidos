@@ -1,8 +1,8 @@
 import requests
 
-url = 'https://api.exemplo.com/dados'
+url = 'http://localhost:8080/transferenciaExterna'
 
-params = {'parametro1': 'valor1', 'parametro2': 'valor2'}
+params = {'clienteId': '11', 'valor': '17.5', 'chaveDestino': 'a55'}
 
 response = requests.get(url, params=params)
 
