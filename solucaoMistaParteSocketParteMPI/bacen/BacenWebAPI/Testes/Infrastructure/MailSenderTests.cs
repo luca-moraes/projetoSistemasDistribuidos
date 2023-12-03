@@ -12,9 +12,9 @@ public class MailSenderTests
     {
         _service = new GMailService(new GMailConfig()
         {
-            password = "pkoveujriixdtoim",
-            fromMail = "carreiradocentefei@gmail.com",
-            fromName = "Carreira Docente",
+            password = "****************",
+            fromMail = "testeSd@gmail.com",
+            fromName = "testeSd",
         });
     }
     [Test]
@@ -22,7 +22,7 @@ public class MailSenderTests
     {
         Assert.DoesNotThrow(() =>
         {
-            _service.sendMail("carreiradocentefei@gmail.com","teste","<h1>teste</h1>");
+            _service.sendMail("testeSd@gmail.com","testeSd","<h1>teste</h1>");
         });
         
     }

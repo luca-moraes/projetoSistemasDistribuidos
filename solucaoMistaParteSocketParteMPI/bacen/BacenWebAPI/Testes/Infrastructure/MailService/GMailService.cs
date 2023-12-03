@@ -49,5 +49,4 @@ public class GMailConfig
     public string fromName { get; set; } = null!;
 
     public string password { get; set; } = null!;
-    // senha pkoveujriixdtoim
 }
