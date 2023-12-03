@@ -13,5 +13,6 @@ sudo apt install python
 sudo apt install python-pip
 sudo apt install python3
 sudo apt install python3-pip
+sudo apt install python-is-python3
 
-
+pip install mpi4py
