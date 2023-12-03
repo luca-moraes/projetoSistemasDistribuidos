@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/BacenWebAPI.csproj": {}
+    "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj": {}
   },
   "projects": {
-    "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/BacenWebAPI.csproj": {
+    "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/BacenWebAPI.csproj",
+        "projectUniqueName": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj",
         "projectName": "BacenWebAPI",
-        "projectPath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/BacenWebAPI.csproj",
+        "projectPath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj",
         "packagesPath": "/home/eu/.nuget/packages/",
-        "outputPath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/obj/",
+        "outputPath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/eu/.nuget/NuGet/NuGet.Config"

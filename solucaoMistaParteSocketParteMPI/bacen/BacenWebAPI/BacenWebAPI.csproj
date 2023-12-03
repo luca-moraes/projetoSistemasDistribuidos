@@ -14,4 +14,36 @@
         <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- Ignorando arquivos de teste -->
+        <None Update="Testes/**/*.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </None>
+        <None Remove="Testes\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Testes\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Testes\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="Testes\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\bin\Debug\net7.0\ConsoleTests.deps.json" />
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\bin\Debug\net7.0\ConsoleTests.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\bin\Debug\net7.0\publish\ConsoleTests.deps.json" />
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\bin\Debug\net7.0\publish\ConsoleTests.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\obj\ConsoleTests.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\obj\Debug\net7.0\ConsoleTests.deps.json" />
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="Testes\ConsoleTests\obj\project.packagespec.json" />
+    </ItemGroup>
+
 </Project>

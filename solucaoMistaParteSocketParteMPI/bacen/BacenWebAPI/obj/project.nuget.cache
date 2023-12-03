@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "K422ff6LZm2AlQF0S9VFvwoGyXyYN5jrY1oz0NQT1Xix9lJJlLPDOb1qAg1hgrfpkXeonnUaxRzG3BgmSpHLMg==",
+  "dgSpecHash": "w7jCkD2tZhWc8PPHFOi3bvGy8xt7SgZuHCljJShVvoBscojoe2sI6kxX2leyTUVfFRD91aMgPVAZ8hXuVcHAAg==",
   "success": true,
-  "projectFilePath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoSocket/bacen/BacenWebAPI/BacenWebAPI.csproj",
+  "projectFilePath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj",
   "expectedPackageFiles": [
     "/home/eu/.nuget/packages/microsoft.aspnetcore.jsonpatch/7.0.14/microsoft.aspnetcore.jsonpatch.7.0.14.nupkg.sha512",
     "/home/eu/.nuget/packages/microsoft.aspnetcore.mvc.newtonsoftjson/7.0.14/microsoft.aspnetcore.mvc.newtonsoftjson.7.0.14.nupkg.sha512",
