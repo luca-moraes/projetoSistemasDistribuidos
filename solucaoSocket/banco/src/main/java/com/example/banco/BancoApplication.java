@@ -1,7 +1,12 @@
 package com.example.banco;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.server.ConfigurableWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,16 +27,21 @@ import com.google.gson.JsonParser;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
+import javax.xml.crypto.dsig.spec.XSLTTransformParameterSpec;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 
 @SpringBootApplication
 @RestController
 public class BancoApplication {
+	@Value("${server.port}")
+	private int portaPadrao;
+
 	public static HashMap<Integer, Cliente> clientes = new HashMap<>();
 
 	public static void main(String[] args) {
@@ -39,17 +49,51 @@ public class BancoApplication {
 		SpringApplication.run(BancoApplication.class, args);
 	}
 
+	public static int direcionamentoPortas(String chave){
+		int porta = 8080;
+		switch (chave){
+			case "a":
+				porta = 8081;
+				break;
+			case "b":
+				porta = 8082;
+				break;
+			case "c":
+				porta = 8083;
+				break;
+		}
+		return porta;
+	}
+
+	@Bean
+	public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer() {
+		return factory -> factory.setPort(portaPadrao);
+	}
+
+	@GetMapping("/saldoTotal")
+	public float saldoTotal(){
+		// teste req: http://localhost:8080/saldoTotal
+
+		float saldoTotal = 0;
+
+		for(int i = 1; i <= 5000; i++){
+			saldoTotal += clientes.get(i).saldo;
+		}
+
+		return saldoTotal;
+	}
+
 	@GetMapping("/receberValor")
 	public int receberValor(@RequestParam(value = "chaveOrigem") String chaveOrigem, @RequestParam(value = "valor") float valor, @RequestParam(value = "destinoId") int destinoId){
 		try {
-			System.out.println("\nREQ rec: " + chaveOrigem);
+			// System.out.println("\nREQ rec: " + chaveOrigem);
 			// teste req: http://localhost:8080/receberValor?chaveOrigem=a22&valor=12&destinoId=11
 
 			Cliente clienteDestinoPix = clientes.get(destinoId);
 
 			clienteDestinoPix.adicionarSaldo(valor);
 
-			System.out.println("Valor " + valor + " recebido de " + chaveOrigem + " para " + destinoId + " saldo=" + clienteDestinoPix.saldo);
+			// System.out.println("Valor " + valor + " recebido de " + chaveOrigem + " para " + destinoId + " saldo=" + clienteDestinoPix.saldo);
 
 			return 200;
 		} catch (Exception e) {
@@ -61,21 +105,21 @@ public class BancoApplication {
 	@GetMapping("/transferenciaInterna")
 	public int transferenciaInterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") float valor, @RequestParam(value = "clienteDestino") int clienteDestino){
 		try {
-			System.out.println("\nREQ int: " + clienteDestino);
-			// teste req: http://localhost:8080/transferenciaInterna?clienteId=11&valor=12&clienteDestino=a1
+			// System.out.println("\nREQ int: " + clienteDestino);
+			// teste req: http://localhost:8080/transferenciaInterna?clienteId=11&valor=12&clienteDestino=21
 
 			Cliente clienteDestinoPix = clientes.get(clienteDestino);
 			Cliente clienteOrigem = clientes.get(clienteId);
 
 			if(valor > clienteOrigem.saldo){
-				System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
+				// System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
 				return 405;
 			}
 
 			clienteOrigem.descontarSaldo(valor);
 			clienteDestinoPix.adicionarSaldo(valor);
 
-			System.out.println("Valor " + valor + " enviado de " + clienteOrigem.clienteId + " saldo:" + clienteOrigem.saldo + " para " + clienteDestinoPix.clienteId + " saldo:" + clienteDestinoPix.saldo);
+			// System.out.println("Valor " + valor + " enviado de " + clienteOrigem.clienteId + " saldo:" + clienteOrigem.saldo + " para " + clienteDestinoPix.clienteId + " saldo:" + clienteDestinoPix.saldo);
 			return 200;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -88,7 +132,7 @@ public class BancoApplication {
 		// @GetMapping("/FazerTransferencia/{clienteId}/{value}/{key}")
 		// public int fazerTransferencia(@PathVariable int clienteId, @PathVariable float value, @PathVariable String key) {
 		try {
-			System.out.println("\nREQ ext: " + chaveDestino);
+			// System.out.println("\nREQ ext: " + chaveDestino);
 			// teste req: http://localhost:8080/FazerTransferencia/11/12/a1
 			// teste req: http://localhost:8080/transferenciaExterna?clienteId=11&valor=12&chaveDestino=a1
 
@@ -100,22 +144,23 @@ public class BancoApplication {
 			Cliente clienteOrigem = clientes.get(clienteId);
 
 			if(valor > clienteOrigem.saldo){
-				System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
+				// System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
 				return 405;
 			}
 
 			clienteOrigem.descontarSaldo(valor);
 
-			if(chamarApiRecebimento("a"+clienteOrigem.clienteId, valor, clienteDestinoPix.numeroConta) == 200){
-				System.out.println("enviado!");
+			if(chamarApiRecebimento("a"+clienteOrigem.clienteId, valor, clienteDestinoPix.numeroConta, clienteDestinoPix.nomeInstituicao) == 200){
+				// System.out.println("enviado!");
+				return 200;
 			}else{
 				clienteOrigem.adicionarSaldo(valor);
 				return 404;
 			}
 
-			System.out.println("Valor " + valor + " enviado para o cliente " + clienteDestinoPix.numeroConta + " da instituição " + clienteDestinoPix.nomeInstituicao);
+			// System.out.println("Valor " + valor + " enviado para o cliente " + clienteDestinoPix.numeroConta + " da instituição " + clienteDestinoPix.nomeInstituicao);
 			// System.out.println("Saldo atual:" + clientes.get(clienteId).saldo);
-			return 200;
+			// return 200;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 404;
@@ -126,13 +171,13 @@ public class BancoApplication {
 		String apiUrl = "https://localhost:7048/Bacen?chave=" + chaveDestino;
 
 		OkHttpClient client = new OkHttpClient.Builder()
-				.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
-				.hostnameVerifier((hostname, session) -> true)
-				.build();
+			.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
+			.hostnameVerifier((hostname, session) -> true)
+			.build();
 
 		Request request = new Request.Builder()
-				.url(apiUrl)
-				.build();
+			.url(apiUrl)
+			.build();
 
 		try {
 			Response response = client.newCall(request).execute();
@@ -143,7 +188,7 @@ public class BancoApplication {
 				JsonParser parser = new JsonParser();
 				JsonObject jsonResponse = parser.parse(responseBody).getAsJsonObject();
 
-				System.out.println("Parsed JSON: " + jsonResponse.toString());
+				// System.out.println("Parsed JSON: " + jsonResponse.toString());
 
 				String instituicaoNome = jsonResponse.getAsJsonObject("clienteData").get("nomeInstituicao").getAsString();
 				int clienteDestinoId = jsonResponse.getAsJsonObject("clienteData").get("numeroConta").getAsInt();
@@ -154,7 +199,7 @@ public class BancoApplication {
 
 				return clienteDestinoPix;
 			} else {
-				System.out.println("Falha na chamada à API externa: " + response.code());
+				// System.out.println("Falha na chamada à API externa: " + response.code());
 				return null;
 			}
 		} catch (IOException e) {
@@ -163,17 +208,18 @@ public class BancoApplication {
 		}
 	}
 
-	private static int chamarApiRecebimento(String chaveOrig, float valor, int chaveDest) {
-		String apiUrl = "http://localhost:8080/receberValor?chaveOrigem=" + chaveOrig + "&valor=" + valor + "&destinoId=" + chaveDest;
+	private static int chamarApiRecebimento(String chaveOrig, float valor, int destinoId, String bancoDestino) {
+
+		String apiUrl = "http://localhost:" + direcionamentoPortas(bancoDestino) + "/receberValor?chaveOrigem=" + chaveOrig + "&valor=" + valor + "&destinoId=" + destinoId;
 
 		OkHttpClient client = new OkHttpClient.Builder()
-				.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
-				.hostnameVerifier((hostname, session) -> true)
-				.build();
+			.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
+			.hostnameVerifier((hostname, session) -> true)
+			.build();
 
 		Request request = new Request.Builder()
-				.url(apiUrl)
-				.build();
+			.url(apiUrl)
+			.build();
 
 		try {
 			Response response = client.newCall(request).execute();
@@ -181,7 +227,7 @@ public class BancoApplication {
 			if (response.isSuccessful()) {
 				return 200;
 			} else {
-				System.out.println("Falha na chamada à API externa: " + response.code());
+				// System.out.println("Falha na chamada à API externa: " + response.code());
 				return 404;
 			}
 		} catch (IOException e) {

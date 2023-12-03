@@ -1,3 +1,4 @@
 com/example/banco/Cliente.class
-com/example/banco/Banco.class
+com/example/banco/BancoApplication$TrustAllManager.class
+com/example/banco/BancoApplication.class
 com/example/banco/ClienteDestino.class
