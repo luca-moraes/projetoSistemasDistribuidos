@@ -22,6 +22,7 @@ def randomChave():
     
 def transferenciaExterna(porta):
     url = f'http://localhost:{porta}/transferenciaExterna'
+    #params = {'clienteId': str(random.randint(1, 5000)), 'valor': str(random.randint(1, 50)), 'chaveDestino': randomChave()}
     params = {'clienteId': str(random.randint(1, 5000)), 'valor': f"{random.uniform(0.0, 10.0):.2f}", 'chaveDestino': randomChave()}
     response = requests.get(url, params=params)
     if response.status_code == 200:
@@ -32,7 +33,8 @@ def transferenciaExterna(porta):
 
 def transferenciaInterna(porta):
     url = f'http://localhost:{porta}/transferenciaInterna'
-    params = {'clienteId': str(random.randint(1, 5000)), 'valor': f"{random.uniform(0.0, 10.0):.2f}", 'clienteDestino': str(random.randint(1, 5000))}
+    #params = {'clienteId': str(random.randint(1, 5000)), 'valor': str(random.randint(1, 50)), 'clienteDestino': str(random.randint(1, 5000))}
+    params = {'clienteId': str(random.randint(1, 5000)), 'valor': f'{random.uniform(0.0, 10.0):.2f}', 'clienteDestino': str(random.randint(1, 5000))}
     response = requests.get(url, params=params)
     if response.status_code == 200:
         data = response.json()
@@ -81,12 +83,22 @@ else:
 instituicoes = ['a', 'b', 'c']    
 instituicoes.remove(instituicao)
 
-print(f"Saldo total instiuição {instituicao} (Rank {rank}): {saldoTotal(porta)}")
+saldoInicial = saldoTotal(porta)
+
+saldoConjunto = comm.reduce(saldoInicial, op=MPI.SUM, root=0)
+
+print(f"Saldo total instiuição {instituicao} (Rank {rank}): {saldoInicial}")
+
+comm.Barrier()
+
+if(rank == 0):
+    print(f"Saldo conjunto: {saldoConjunto}")
+
 comm.Barrier()
 
 threads = []
 
-for i in range(0, 10):
+for i in range(0, 2500):
     threads.append(threading.Thread(target=transferenciaExterna, args=(porta,)))
     threads.append(threading.Thread(target=transferenciaInterna, args=(porta,)))
     
@@ -98,5 +110,15 @@ for thread in threads:
     
 comm.Barrier()
 
-print(f"Saldo final instiuição {instituicao} (Rank {rank}): {saldoTotal(porta)}")
+saldoIndividual = saldoTotal(porta)
+
+print(f"Saldo final instiuição {instituicao} (Rank {rank}): {saldoIndividual}")
+
+comm.Barrier()
+
+saldoGeral = comm.reduce(saldoIndividual, op=MPI.SUM, root=0)
+
+if(rank == 0):
+    print(f"Saldo geral: {saldoGeral}")
+
 print(f"Fim do programa (Rank {rank}).")

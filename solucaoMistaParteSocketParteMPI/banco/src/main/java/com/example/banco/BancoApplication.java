@@ -31,6 +31,7 @@ import javax.xml.crypto.dsig.spec.XSLTTransformParameterSpec;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
@@ -71,20 +72,36 @@ public class BancoApplication {
 	}
 
 	@GetMapping("/saldoTotal")
-	public float saldoTotal(){
+	public BigDecimal saldoTotal(){
 		// teste req: http://localhost:8080/saldoTotal
 
-		float saldoTotal = 0;
+		BigDecimal saldoTotal = BigDecimal.ZERO;
 
 		for(int i = 1; i <= 5000; i++){
-			saldoTotal += clientes.get(i).saldo;
+			saldoTotal = saldoTotal.add(clientes.get(i).saldo);
 		}
 
 		return saldoTotal;
 	}
 
+	@GetMapping("/resetarSaldos")
+	public int resetarSaldos(){
+		try {			
+			// teste req: http://localhost:8080/resetarSaldos
+			for(int i = 1; i <= 5000; i++){
+				clientes.get(i).saldo = new BigDecimal("100.00");
+			}
+			// System.out.println("Saldos resetados!");
+
+			return 200;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return 404;
+		}
+	}
+
 	@GetMapping("/receberValor")
-	public int receberValor(@RequestParam(value = "chaveOrigem") String chaveOrigem, @RequestParam(value = "valor") float valor, @RequestParam(value = "destinoId") int destinoId){
+	public int receberValor(@RequestParam(value = "chaveOrigem") String chaveOrigem, @RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "destinoId") int destinoId){
 		try {
 			// System.out.println("\nREQ rec: " + chaveOrigem);
 			// teste req: http://localhost:8080/receberValor?chaveOrigem=a22&valor=12&destinoId=11
@@ -103,7 +120,7 @@ public class BancoApplication {
 	}
 
 	@GetMapping("/transferenciaInterna")
-	public int transferenciaInterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") float valor, @RequestParam(value = "clienteDestino") int clienteDestino){
+	public int transferenciaInterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "clienteDestino") int clienteDestino){
 		try {
 			// System.out.println("\nREQ int: " + clienteDestino);
 			// teste req: http://localhost:8080/transferenciaInterna?clienteId=11&valor=12&clienteDestino=21
@@ -111,7 +128,7 @@ public class BancoApplication {
 			Cliente clienteDestinoPix = clientes.get(clienteDestino);
 			Cliente clienteOrigem = clientes.get(clienteId);
 
-			if(valor > clienteOrigem.saldo){
+			if(clienteOrigem.saldo.compareTo(valor) < 0){
 				// System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
 				return 405;
 			}
@@ -128,7 +145,7 @@ public class BancoApplication {
 	}
 
 	@GetMapping("/transferenciaExterna")
-	public int transferenciaExterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") float valor, @RequestParam(value = "chaveDestino") String chaveDestino){
+	public int transferenciaExterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "chaveDestino") String chaveDestino){
 		// @GetMapping("/FazerTransferencia/{clienteId}/{value}/{key}")
 		// public int fazerTransferencia(@PathVariable int clienteId, @PathVariable float value, @PathVariable String key) {
 		try {
@@ -143,18 +160,18 @@ public class BancoApplication {
 			ClienteDestino clienteDestinoPix = obterClienteDestino(chaveDestino);
 			Cliente clienteOrigem = clientes.get(clienteId);
 
-			if(valor > clienteOrigem.saldo){
+			if(clienteOrigem.saldo.compareTo(valor) < 0){
 				// System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
 				return 405;
 			}
 
-			clienteOrigem.descontarSaldo(valor);
 
 			if(chamarApiRecebimento("a"+clienteOrigem.clienteId, valor, clienteDestinoPix.numeroConta, clienteDestinoPix.nomeInstituicao) == 200){
 				// System.out.println("enviado!");
+				clienteOrigem.descontarSaldo(valor);
 				return 200;
 			}else{
-				clienteOrigem.adicionarSaldo(valor);
+				// clienteOrigem.adicionarSaldo(valor);
 				return 404;
 			}
 
@@ -208,18 +225,18 @@ public class BancoApplication {
 		}
 	}
 
-	private static int chamarApiRecebimento(String chaveOrig, float valor, int destinoId, String bancoDestino) {
+	private static int chamarApiRecebimento(String chaveOrig, BigDecimal valor, int destinoId, String bancoDestino) {
 
 		String apiUrl = "http://localhost:" + direcionamentoPortas(bancoDestino) + "/receberValor?chaveOrigem=" + chaveOrig + "&valor=" + valor + "&destinoId=" + destinoId;
 
 		OkHttpClient client = new OkHttpClient.Builder()
 			.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
 			.hostnameVerifier((hostname, session) -> true)
-			.build();
+		.build();
 
 		Request request = new Request.Builder()
 			.url(apiUrl)
-			.build();
+		.build();
 
 		try {
 			Response response = client.newCall(request).execute();
@@ -263,7 +280,7 @@ public class BancoApplication {
 
 	public static void fillHash(){
 		for(int i = 1; i <= 5000; i++){
-			clientes.put(i, new Cliente(i, 100.0f));
+			clientes.put(i, new Cliente(i, new BigDecimal("100.00")));
 		}
 	}
 
@@ -285,19 +302,21 @@ public class BancoApplication {
 
 class Cliente{
 	int clienteId;
-	float saldo;
+	BigDecimal saldo;
 
-	public Cliente(int clienteId, float saldo) {
+	public Cliente(int clienteId, BigDecimal saldo) {
 		this.clienteId = clienteId;
 		this.saldo = saldo;
 	}
 
-	public void descontarSaldo(float valor) {
-		this.saldo -= valor;
+	public synchronized void descontarSaldo(BigDecimal valor) {
+		if(this.saldo.compareTo(valor) >= 0){
+			this.saldo = this.saldo.subtract(valor);
+		}
 	}
 
-	public void adicionarSaldo(float valor) {
-		this.saldo += valor;
+	public synchronized void adicionarSaldo(BigDecimal valor) {
+    	this.saldo = this.saldo.add(valor);
 	}
 }
 
