@@ -1,26 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj": {}
+    "/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj": {}
   },
   "projects": {
-    "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj": {
+    "/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj",
+        "projectUniqueName": "/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj",
         "projectName": "BacenWebAPI",
-        "projectPath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj",
-        "packagesPath": "/home/eu/.nuget/packages/",
-        "outputPath": "/home/eu/Downloads/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/obj/",
+        "projectPath": "/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/BacenWebAPI.csproj",
+        "packagesPath": "/home/alunos/.nuget/packages/",
+        "outputPath": "/home/alunos/Desktop/projetoSistemasDistribuidos/solucaoMistaParteSocketParteMPI/bacen/BacenWebAPI/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/eu/.nuget/NuGet/NuGet.Config"
+          "/home/alunos/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
         ],
         "sources": {
-          "/usr/lib/dotnet/sdk/7.0.302/Sdks/Microsoft.NET.Sdk.Web/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -74,11 +73,11 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[7.0.5, 7.0.5]"
+              "version": "[7.0.10, 7.0.10]"
             },
             {
               "name": "Microsoft.NETCore.App.Ref",
-              "version": "[7.0.5, 7.0.5]"
+              "version": "[7.0.10, 7.0.10]"
             }
           ],
           "frameworkReferences": {
@@ -89,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/7.0.302/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/7.0.400/RuntimeIdentifierGraph.json"
         }
       }
     }

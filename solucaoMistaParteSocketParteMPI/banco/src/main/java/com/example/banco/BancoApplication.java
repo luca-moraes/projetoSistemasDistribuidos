@@ -185,7 +185,7 @@ public class BancoApplication {
 	}
 
 	private static ClienteDestino obterClienteDestino(String chaveDestino) {
-		String apiUrl = "https://localhost:7048/Bacen?chave=" + chaveDestino;
+		String apiUrl = "http://10.210.23.228:5288//Bacen?chave=" + chaveDestino;
 
 		OkHttpClient client = new OkHttpClient.Builder()
 			.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
