@@ -16,4 +16,8 @@ sudo apt install python3
 sudo apt install python3-pip
 sudo apt install python-is-python3
 
+sudo apt-get install libopenmpi-dev
+# apt --fix-broken install
+# apt install mpich
+
 pip install mpi4py

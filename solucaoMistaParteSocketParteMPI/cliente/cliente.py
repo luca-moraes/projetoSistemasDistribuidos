@@ -15,13 +15,15 @@ import sys
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
+urlBase = 'http://10.210.2.206'
+
 def randomChave():    
     codigoNumero = str(random.randint(1, 5000))
     codigoInstituicao = random.choice(instituicoes)
     return str(codigoInstituicao + codigoNumero)
     
 def transferenciaExterna(porta):
-    url = f'http://localhost:{porta}/transferenciaExterna'
+    url = f'{urlBase}:{porta}/transferenciaExterna'
     #params = {'clienteId': str(random.randint(1, 5000)), 'valor': str(random.randint(1, 50)), 'chaveDestino': randomChave()}
     params = {'clienteId': str(random.randint(1, 5000)), 'valor': f"{random.uniform(0.0, 10.0):.2f}", 'chaveDestino': randomChave()}
     response = requests.get(url, params=params)
@@ -32,7 +34,7 @@ def transferenciaExterna(porta):
         print(f'Falha na transferência externa, código de status: {response.status_code}')
 
 def transferenciaInterna(porta):
-    url = f'http://localhost:{porta}/transferenciaInterna'
+    url = f'{urlBase}:{porta}/transferenciaInterna'
     #params = {'clienteId': str(random.randint(1, 5000)), 'valor': str(random.randint(1, 50)), 'clienteDestino': str(random.randint(1, 5000))}
     params = {'clienteId': str(random.randint(1, 5000)), 'valor': f'{random.uniform(0.0, 10.0):.2f}', 'clienteDestino': str(random.randint(1, 5000))}
     response = requests.get(url, params=params)
@@ -43,7 +45,7 @@ def transferenciaInterna(porta):
         print(f'Falha na transferência interna, código de status: {response.status_code}')
         
 def saldoTotal(porta):
-    url = f'http://localhost:{porta}/saldoTotal'
+    url = f'{urlBase}:{porta}/saldoTotal'
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
