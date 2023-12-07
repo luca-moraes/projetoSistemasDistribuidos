@@ -15,7 +15,8 @@ import sys
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 
-urlBase = 'http://10.210.2.206'
+# urlBase = 'http://10.210.2.206'
+urlBase = 'http://localhost'
 
 def randomChave():    
     codigoNumero = str(random.randint(1, 5000))
