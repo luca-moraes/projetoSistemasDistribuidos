@@ -52,7 +52,7 @@ def saldoTotal(porta):
         data = response.json()
         return data
     else:
-        print(f'Falha na transferência externa, código de status: {response.status_code}')
+        print(f'Falha no saldo, código de status: {response.status_code}')
 
 # if len(sys.argv) != 2:
 #     print("Erro: Nenhum argumento foi fornecido!")
@@ -101,7 +101,7 @@ comm.Barrier()
 
 threads = []
 
-for i in range(0, 2500):
+for i in range(0, 1000):
     threads.append(threading.Thread(target=transferenciaExterna, args=(porta,)))
     threads.append(threading.Thread(target=transferenciaInterna, args=(porta,)))
     

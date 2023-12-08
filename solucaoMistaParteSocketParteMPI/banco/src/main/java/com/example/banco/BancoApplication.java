@@ -37,6 +37,12 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 @SpringBootApplication
 @RestController
 public class BancoApplication {
@@ -109,7 +115,6 @@ public class BancoApplication {
 	public int transferenciaInterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "clienteDestino") int clienteDestino){
 		try {
 			// teste req: http://localhost:8080/transferenciaInterna?clienteId=11&valor=12&clienteDestino=21
-
 			Cliente clienteDestinoPix = clientes.get(clienteDestino);
 			Cliente clienteOrigem = clientes.get(clienteId);
 
@@ -138,7 +143,6 @@ public class BancoApplication {
 
 		try {
 			// teste req: http://localhost:8080/transferenciaExterna?clienteId=11&valor=12&chaveDestino=a1
-
 			ClienteDestino clienteDestinoPix = obterClienteDestino(chaveDestino);
 
 			if(clienteOrigem.saldo.compareTo(valor) < 0){
@@ -150,7 +154,7 @@ public class BancoApplication {
 				return 200;
 			}else{
 				clienteOrigem.resetarSaldo(saldoPrevio);
-				return 404;
+				return 406;
 			}
 		} catch (Exception e) {
 			clienteOrigem.resetarSaldo(saldoPrevio);
@@ -159,8 +163,8 @@ public class BancoApplication {
 	}
 
 	private static ClienteDestino obterClienteDestino(String chaveDestino) {
-		// String apiUrl = "http://10.210.23.228:5288/Bacen?chave=" + chaveDestino;
-		String apiUrl = "https://localhost:7048/Bacen?chave=" + chaveDestino;
+		String apiUrl = "http://10.210.23.228:5288/Bacen?chave=" + chaveDestino;
+		// String apiUrl = "https://localhost:7048/Bacen?chave=" + chaveDestino;
 
 
 		OkHttpClient client = new OkHttpClient.Builder()
@@ -235,7 +239,6 @@ public class BancoApplication {
 
 		try {
 			// teste req: http://localhost:8080/receberValor?valor=12&destinoId=11
-
 			clienteDestinoPix.adicionarSaldo(valor);
 
 			return 200;
@@ -284,29 +287,80 @@ public class BancoApplication {
 	}
 }
 
+// class Transacao {
+//     private List<Operacao> operacoes = new ArrayList<>();
+
+//     public void adicionarOperacao(Operacao operacao) {
+//         operacoes.add(operacao);
+//     }
+
+//     public void iniciarTransacao() {
+//         // Lógica para iniciar a transação (se necessário)
+//     }
+
+//     public void reverterTransacao() {
+//         for (Operacao operacao : operacoes) {
+//             operacao.reverter();
+//         }
+//     }
+
+//     public void completarTransacao() {
+//         for (Operacao operacao : operacoes) {
+//             operacao.aplicar();
+//         }
+//     }
+// }
+
 class Cliente{
 	int clienteId;
 	BigDecimal saldo;
+	private Lock lock = new ReentrantLock();
 
 	public Cliente(int clienteId, BigDecimal saldo) {
 		this.clienteId = clienteId;
 		this.saldo = saldo;
 	}
 
-	public synchronized void resetarSaldo(BigDecimal valor) {
-		this.saldo = valor;
-	}
-
-	public synchronized void descontarSaldo(BigDecimal valor) {
-		if(this.saldo.compareTo(valor) >= 0){
-			this.saldo = this.saldo.subtract(valor);
+	public void resetarSaldo(BigDecimal valor) {
+		lock.lock();
+		try{
+			this.saldo = valor;
+		}finally{
+			lock.unlock();
 		}
 	}
 
-	public synchronized void adicionarSaldo(BigDecimal valor) {
-    	this.saldo = this.saldo.add(valor);
+	public void descontarSaldo(BigDecimal valor) {
+		lock.lock();
+		try{
+			if(this.saldo.compareTo(valor) >= 0){
+				this.saldo = this.saldo.subtract(valor);
+			}	
+		}finally{
+			lock.unlock();
+		}
 	}
+
+	public void adicionarSaldo(BigDecimal valor) {
+		lock.lock();
+		try{
+			this.saldo = this.saldo.add(valor);
+		}finally{
+			lock.unlock();
+		}
+	}
+
+	// @Override
+    // public synchronized void aplicar() {
+    //     // Lógica para aplicar a operação no saldo do cliente
+    // }
+
+    // @Override
+    // public synchronized void reverter() {
+    //     // Lógica para reverter a operação no saldo do cliente
+    // }
 }
+
 
 class ClienteDestino{
 	String nomeInstituicao;
