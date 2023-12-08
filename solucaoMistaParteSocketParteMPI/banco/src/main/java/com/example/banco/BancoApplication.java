@@ -50,6 +50,17 @@ public class BancoApplication {
 		SpringApplication.run(BancoApplication.class, args);
 	}
 
+	@Bean
+	public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer() {
+		return factory -> factory.setPort(portaPadrao);
+	}
+
+	public static void fillHash(){
+		for(int i = 1; i <= 5000; i++){
+			clientes.put(i, new Cliente(i, new BigDecimal("100.00")));
+		}
+	}
+
 	public static int direcionamentoPortas(String chave){
 		int porta = 8080;
 		switch (chave){
@@ -64,11 +75,6 @@ public class BancoApplication {
 				break;
 		}
 		return porta;
-	}
-
-	@Bean
-	public WebServerFactoryCustomizer<ConfigurableWebServerFactory> webServerFactoryCustomizer() {
-		return factory -> factory.setPort(portaPadrao);
 	}
 
 	@GetMapping("/saldoTotal")
@@ -91,30 +97,10 @@ public class BancoApplication {
 			for(int i = 1; i <= 5000; i++){
 				clientes.get(i).saldo = new BigDecimal("100.00");
 			}
-			// System.out.println("Saldos resetados!");
 
 			return 200;
 		}catch (Exception e) {
-			e.printStackTrace();
-			return 404;
-		}
-	}
-
-	@GetMapping("/receberValor")
-	public int receberValor(@RequestParam(value = "chaveOrigem") String chaveOrigem, @RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "destinoId") int destinoId){
-		try {
-			// System.out.println("\nREQ rec: " + chaveOrigem);
-			// teste req: http://localhost:8080/receberValor?chaveOrigem=a22&valor=12&destinoId=11
-
-			Cliente clienteDestinoPix = clientes.get(destinoId);
-
-			clienteDestinoPix.adicionarSaldo(valor);
-
-			// System.out.println("Valor " + valor + " recebido de " + chaveOrigem + " para " + destinoId + " saldo=" + clienteDestinoPix.saldo);
-
-			return 200;
-		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			return 404;
 		}
 	}
@@ -122,64 +108,52 @@ public class BancoApplication {
 	@GetMapping("/transferenciaInterna")
 	public int transferenciaInterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "clienteDestino") int clienteDestino){
 		try {
-			// System.out.println("\nREQ int: " + clienteDestino);
 			// teste req: http://localhost:8080/transferenciaInterna?clienteId=11&valor=12&clienteDestino=21
 
 			Cliente clienteDestinoPix = clientes.get(clienteDestino);
 			Cliente clienteOrigem = clientes.get(clienteId);
 
 			if(clienteOrigem.saldo.compareTo(valor) < 0){
-				// System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
 				return 405;
 			}
 
 			clienteOrigem.descontarSaldo(valor);
 			clienteDestinoPix.adicionarSaldo(valor);
 
-			// System.out.println("Valor " + valor + " enviado de " + clienteOrigem.clienteId + " saldo:" + clienteOrigem.saldo + " para " + clienteDestinoPix.clienteId + " saldo:" + clienteDestinoPix.saldo);
 			return 200;
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			return 404;
 		}
 	}
 
 	@GetMapping("/transferenciaExterna")
 	public int transferenciaExterna(@RequestParam(value = "clienteId") int clienteId, @RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "chaveDestino") String chaveDestino){
-		// @GetMapping("/FazerTransferencia/{clienteId}/{value}/{key}")
-		// public int fazerTransferencia(@PathVariable int clienteId, @PathVariable float value, @PathVariable String key) {
+		if(!clientes.containsKey(clienteId)){
+			return 404;
+		}
+
+		Cliente clienteOrigem = clientes.get(clienteId);
+		BigDecimal saldoPrevio = clienteOrigem.saldo;
+
 		try {
-			// System.out.println("\nREQ ext: " + chaveDestino);
-			// teste req: http://localhost:8080/FazerTransferencia/11/12/a1
 			// teste req: http://localhost:8080/transferenciaExterna?clienteId=11&valor=12&chaveDestino=a1
 
-			// ClienteDestino clienteDestinoPix = new ClienteDestino();
-			// clienteDestinoPix.nomeInstituicao = "Banco do Brasil";
-			//clienteDestinoPix.numeroConta = 22;
-
 			ClienteDestino clienteDestinoPix = obterClienteDestino(chaveDestino);
-			Cliente clienteOrigem = clientes.get(clienteId);
 
 			if(clienteOrigem.saldo.compareTo(valor) < 0){
-				// System.out.println("Saldo cliente " + clienteOrigem.clienteId + "="+ clienteOrigem.saldo + " menor que valor " + valor);
 				return 405;
 			}
 
-
-			if(chamarApiRecebimento("a"+clienteOrigem.clienteId, valor, clienteDestinoPix.numeroConta, clienteDestinoPix.nomeInstituicao) == 200){
-				// System.out.println("enviado!");
+			if(chamarApiRecebimento(valor, clienteDestinoPix.numeroConta, clienteDestinoPix.nomeInstituicao) == 200){
 				clienteOrigem.descontarSaldo(valor);
 				return 200;
 			}else{
-				// clienteOrigem.adicionarSaldo(valor);
+				clienteOrigem.resetarSaldo(saldoPrevio);
 				return 404;
 			}
-
-			// System.out.println("Valor " + valor + " enviado para o cliente " + clienteDestinoPix.numeroConta + " da instituição " + clienteDestinoPix.nomeInstituicao);
-			// System.out.println("Saldo atual:" + clientes.get(clienteId).saldo);
-			// return 200;
 		} catch (Exception e) {
-			e.printStackTrace();
+			clienteOrigem.resetarSaldo(saldoPrevio);
 			return 404;
 		}
 	}
@@ -207,8 +181,6 @@ public class BancoApplication {
 				JsonParser parser = new JsonParser();
 				JsonObject jsonResponse = parser.parse(responseBody).getAsJsonObject();
 
-				// System.out.println("Parsed JSON: " + jsonResponse.toString());
-
 				String instituicaoNome = jsonResponse.getAsJsonObject("clienteData").get("nomeInstituicao").getAsString();
 				int clienteDestinoId = jsonResponse.getAsJsonObject("clienteData").get("numeroConta").getAsInt();
 
@@ -218,18 +190,16 @@ public class BancoApplication {
 
 				return clienteDestinoPix;
 			} else {
-				// System.out.println("Falha na chamada à API externa: " + response.code());
 				return null;
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			return null;
 		}
 	}
 
-	private static int chamarApiRecebimento(String chaveOrig, BigDecimal valor, int destinoId, String bancoDestino) {
-
-		String apiUrl = "http://localhost:" + direcionamentoPortas(bancoDestino) + "/receberValor?chaveOrigem=" + chaveOrig + "&valor=" + valor + "&destinoId=" + destinoId;
+	private static int chamarApiRecebimento(BigDecimal valor, int destinoId, String bancoDestino) {
+		String apiUrl = "http://localhost:" + direcionamentoPortas(bancoDestino) + "/receberValor?valor=" + valor + "&destinoId=" + destinoId;
 
 		OkHttpClient client = new OkHttpClient.Builder()
 			.sslSocketFactory(createUnsafeSSLSocketFactory(), new TrustAllManager())
@@ -246,11 +216,32 @@ public class BancoApplication {
 			if (response.isSuccessful()) {
 				return 200;
 			} else {
-				// System.out.println("Falha na chamada à API externa: " + response.code());
 				return 404;
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
+			return 404;
+		}
+	}
+
+	@GetMapping("/receberValor")
+	public int receberValor(@RequestParam(value = "valor") BigDecimal valor, @RequestParam(value = "destinoId") int destinoId){
+		if(!clientes.containsKey(destinoId)){
+			return 404;
+		}
+
+		Cliente clienteDestinoPix = clientes.get(destinoId);
+		BigDecimal saldoPrevio = clienteDestinoPix.saldo;
+
+		try {
+			// teste req: http://localhost:8080/receberValor?valor=12&destinoId=11
+
+			clienteDestinoPix.adicionarSaldo(valor);
+
+			return 200;
+		} catch (Exception e) {
+			// e.printStackTrace();
+			clienteDestinoPix.resetarSaldo(saldoPrevio);
 			return 404;
 		}
 	}
@@ -280,12 +271,6 @@ public class BancoApplication {
 		}
 	}
 
-	public static void fillHash(){
-		for(int i = 1; i <= 5000; i++){
-			clientes.put(i, new Cliente(i, new BigDecimal("100.00")));
-		}
-	}
-
 	@GetMapping("/teste")
 	public String testeCreate(@RequestParam(value = "key", defaultValue = "a1") String chave, @RequestParam(value = "k2", defaultValue = "a2") String c2){
 		return String.format("Response: %s - %s", chave, c2);
@@ -294,9 +279,6 @@ public class BancoApplication {
 
 	@GetMapping("/testePath/{id}/{id2}")
 	public String testePath(@PathVariable Integer id, @PathVariable Integer id2){
-		// id = id == null ? 3 : id;
-		// id2 = id2 == null ? 4 : id2;
-
 		return String.format("Response: %d - %d", id, id2);
 		// teste req: http://localhost:8080/teste?key=a55&k2=a44
 	}
@@ -309,6 +291,10 @@ class Cliente{
 	public Cliente(int clienteId, BigDecimal saldo) {
 		this.clienteId = clienteId;
 		this.saldo = saldo;
+	}
+
+	public synchronized void resetarSaldo(BigDecimal valor) {
+		this.saldo = valor;
 	}
 
 	public synchronized void descontarSaldo(BigDecimal valor) {
