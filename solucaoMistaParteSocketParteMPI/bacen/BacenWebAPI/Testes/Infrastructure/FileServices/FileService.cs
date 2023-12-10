@@ -7,7 +7,7 @@ public class FileService : IFileService
     public bool saveDocContent(string path, Stream content)
     {
         string directoryName = Path.GetDirectoryName(path)
-                               ?? throw new DirectoryNullOrEmptyException($"Diretório {path} não encontrado ou nulo!");
+            ?? throw new DirectoryNullOrEmptyException($"Diretório {path} não encontrado ou nulo!");
 
         if (!Directory.Exists(directoryName))
             Directory.CreateDirectory(directoryName);
