@@ -1,5 +1,5 @@
 # projetoSistemasDistribuidos
-Projeto de curso final da disciplina de Sistemas Distribuidos, disciplina lecionada pelo professor Calebe de Paula Bianchini. O projeto consistia na elaboração de um sistema financeiro distribuido simples.
+Projeto de curso final da disciplina de Sistemas Distribuídos, disciplina lecionada pelo professor Calebe de Paula Bianchini. O projeto consistia na elaboração de um sistema financeiro distribuído simples.
 
 # Membros do grupos
 | Nome  | RA |
